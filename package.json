@@ -1,0 +1,14 @@
+{
+  "name": "devdates",
+  "version": "1.0.0",
+  "description": "A platform for developers",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vishal Jadhav",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
