@@ -1,32 +1,39 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
+const connectDB = require('./config/database')
+const user = require('./models/user.model')
 
-app.use("/test", (req,res) => {
-    res.send(" route /test")
-})
-app.use("/hey" , (req,res) => {
-    res.send(" route /hey")
-})
+app.use(express.json())
 
-app.use('/route1',(req,res) => {
-    res.send(" route /route1")
-} )
-
-
-app.use('/route2',(req,res) => {
-    res.send(" route /route2")
-} )
-
-
-
-app.use("/", (req,res) => {
-    res.send("main route /")
+app.post('/signup', async (req, res) => {
+    try{
+        const newUser = new user({...req.body})
+        console.log(newUser)
+        await newUser.save()
+        res.send("user added succesfully") 
+    }
+    catch(err){
+        res.status(400).json({
+            message : err.message
+        })
+    }
 })
 
 
+app.get('/feed', async (req, res) => {
+    const allUsers = await  user.find({})  
+  
+    res.json(allUsers)
+})
 
+connectDB().then(()=>{
+    console.log("DB connection established")
 
-
-app.listen(3000, ()=> {
-  console.log("server listening on port 3000")   
+    app.listen(process.env.PORT , ()=> {
+      console.log("server listening on port 3000 ")   
+    }) 
+})
+.catch((err) => {
+    console.log("DB connection failed : ", err.message)
 })
