@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken')
 const user = require('../models/user.model')
 
-const userAuth = async (req, res, next) => {
+const verifyUser = async (req, res, next) => {
   try {
-    const {token}  = req.cookies
+    const {token} = req.cookies
 
     if(!token) throw new Error('invalid token')
 
@@ -23,4 +23,4 @@ const userAuth = async (req, res, next) => {
   }
 }
 
-module.exports = userAuth
+module.exports = verifyUser

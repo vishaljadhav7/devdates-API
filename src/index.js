@@ -4,12 +4,12 @@ const express = require('express')
 const app = express()
 const bcrypt = require('bcrypt')
 const cookieParser = require('cookie-parser') 
-const jwt = require('jsonwebtoken')
+
 
 const connectDB = require('./config/database')
 const user = require('./models/user.model')
 const validateSignUpData = require('./utils/validation')
-const userAuth = require('./middlewares/auth')
+const verifyUser = require('./middlewares/auth')
 
 const saltRounds = 10;
 
@@ -20,24 +20,32 @@ app.use(cookieParser())
 app.post('/signup', async (req, res) => {
     try{
         validateSignUpData(req)
-        
-        const {password} = req.body
-        const passwordHash = await bcrypt.hash(password , saltRounds)
 
-        const newUser = new user({...req.body, password : passwordHash})
+        const { firstName, lastName, emailId, password} = req.body;
+        
+        const passwordHash = await bcrypt.hash(password , saltRounds);
+
+        const newUser = new user({
+            firstName, 
+            lastName, 
+            emailId, 
+            password : passwordHash
+          });
 
         await newUser.save()
-        res.send("user added succesfully") 
+        res.status(200).json({
+          message : "user signed up succesfully"
+        }) 
     }
     catch(err){
         res.status(400).json({
-            message : err.message
+            message : "Error"  + err.message
         })
     }
 })
 
 
-app.get('/feed', userAuth , async (req, res) => {
+app.get('/feed', verifyUser , async (req, res) => {
 
   try {
     const allUsers = await  user.find({})  
@@ -94,22 +102,21 @@ app.post('/signin', async (req, res) => {
     }
 
 
-    const isValidPassword = await bcrypt.compare(password, userInfo.password)
+    const isValidPassword = await userInfo.validatePassword(password)
     
     if(!isValidPassword){
       throw new Error('Invalid credentials')
     }else{
 
-      const token = await jwt.sign({_id : userInfo._id}, process.env.SECRET_KEY, {expiresIn : "1d"})
+      const token = await userInfo.generateJWT()
 
-      res.cookie('token', token, {expires : new Date(new Date.now() + 3600000)})
+      res.cookie('token', token, {expires : new Date( Date.now() + 3600000)})
 
       res.status(200).json({
         message : "sign in successful",
         userInfo
       })
     }
-
 
   } catch (error) {
     res.status(200).json({
@@ -121,7 +128,7 @@ app.post('/signin', async (req, res) => {
 }) 
 
 
-app.get('/profile', userAuth , async (req, res) => {
+app.get('/profile', verifyUser , async (req, res) => {
   try {
     const {userInfo} = req;
 
@@ -138,6 +145,12 @@ app.get('/profile', userAuth , async (req, res) => {
   }
 })
 
+app.get('/signout', async (req, res) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+  res.send("Logout Successful!!");
+})
 
 connectDB().then(()=>{
     console.log("DB connection established")
