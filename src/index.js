@@ -100,7 +100,7 @@ app.post('/signin', async (req, res) => {
       throw new Error('Invalid credentials')
     }else{
 
-      const token = await jwt.sign({_id : userInfo._id}, process.env.SECRET_KEY)
+      const token = await jwt.sign({_id : userInfo._id}, process.env.SECRET_KEY, {expiresIn : "1d"})
 
       res.cookie('token', token, {expires : new Date(new Date.now() + 3600000)})
 
