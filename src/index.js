@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken')
 const connectDB = require('./config/database')
 const user = require('./models/user.model')
 const validateSignUpData = require('./utils/validation')
+const userAuth = require('./middlewares/auth')
 
 const saltRounds = 10;
 
@@ -36,7 +37,7 @@ app.post('/signup', async (req, res) => {
 })
 
 
-app.get('/feed', async (req, res) => {
+app.get('/feed', userAuth , async (req, res) => {
 
   try {
     const allUsers = await  user.find({})  
@@ -54,7 +55,6 @@ app.get('/feed', async (req, res) => {
 app.patch('/user/:userId', async (req, res) => {
   const userId = req.params?.userId;
   const userData = req.body;
-
 
   try {
     const ALLOWED_UPDATES = ["photoURL", "about", "gender", "age" , "skills", "lastName"]
@@ -120,21 +120,9 @@ app.post('/signin', async (req, res) => {
 }) 
 
 
-app.get('/profile', async (req, res) => {
+app.get('/profile', userAuth , async (req, res) => {
   try {
-    const {token} = req.cookies;
-    if(!token){
-       throw new Error('invalid token')
-    }
-    
-    const decodedMessage = await jwt.verify(token, process.env.SECRET_KEY)
-    const {_id} = decodedMessage
-
-    const userInfo = await user.findById(_id)
-
-    if(!userInfo){
-      throw new Error('user not found')
-    }
+    const {userInfo} = req;
 
     res.status(200).json({
       message : "user profile",
