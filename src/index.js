@@ -1,7 +1,11 @@
 require('dotenv').config()
+
 const express = require('express')
 const app = express()
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt')
+const cookieParser = require('cookie-parser') 
+const jwt = require('jsonwebtoken')
+
 const connectDB = require('./config/database')
 const user = require('./models/user.model')
 const validateSignUpData = require('./utils/validation')
@@ -10,6 +14,7 @@ const saltRounds = 10;
 
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.post('/signup', async (req, res) => {
     try{
@@ -93,12 +98,17 @@ app.post('/signin', async (req, res) => {
     
     if(!isValidPassword){
       throw new Error('Invalid credentials')
+    }else{
+
+      const token = await jwt.sign({_id : userInfo._id}, process.env.SECRET_KEY)
+      res.cookie('token', token)
+
+      res.status(200).json({
+        message : "sign in successful",
+        userInfo
+      })
     }
 
-    res.status(200).json({
-      message : "sign in successful",
-      userInfo
-    })
 
   } catch (error) {
     res.status(200).json({
@@ -109,6 +119,35 @@ app.post('/signin', async (req, res) => {
 
 }) 
 
+
+app.get('/profile', async (req, res) => {
+  try {
+    const {token} = req.cookies;
+    if(!token){
+       throw new Error('invalid token')
+    }
+    
+    const decodedMessage = await jwt.verify(token, process.env.SECRET_KEY)
+    const {_id} = decodedMessage
+
+    const userInfo = await user.findById(_id)
+
+    if(!userInfo){
+      throw new Error('user not found')
+    }
+
+    res.status(200).json({
+      message : "user profile",
+      userInfo
+    })
+
+  } catch (error) {
+    res.status(400).json({
+      message : "ERROR " + error.message
+    })
+
+  }
+})
 
 
 connectDB().then(()=>{
