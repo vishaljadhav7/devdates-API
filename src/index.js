@@ -101,7 +101,8 @@ app.post('/signin', async (req, res) => {
     }else{
 
       const token = await jwt.sign({_id : userInfo._id}, process.env.SECRET_KEY)
-      res.cookie('token', token)
+
+      res.cookie('token', token, {expires : new Date(new Date.now() + 3600000)})
 
       res.status(200).json({
         message : "sign in successful",
