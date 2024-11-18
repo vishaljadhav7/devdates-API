@@ -2,7 +2,6 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const bcrypt = require('bcrypt');
-
 const connectDB = require('./config/database')
 const user = require('./models/user.model')
 const validateSignUpData = require('./utils/validation')
@@ -77,6 +76,38 @@ app.patch('/user/:userId', async (req, res) => {
      })
   }
 })
+
+app.post('/signin', async (req, res) => {
+ 
+  try {
+    const {emailId , password} = req.body;
+    
+    const userInfo = await user.findOne({emailId}) 
+    
+    if(!userInfo) {
+      throw new Error('Invalid credentials')
+    }
+
+
+    const isValidPassword = await bcrypt.compare(password, userInfo.password)
+    
+    if(!isValidPassword){
+      throw new Error('Invalid credentials')
+    }
+
+    res.status(200).json({
+      message : "sign in successful",
+      userInfo
+    })
+
+  } catch (error) {
+    res.status(200).json({
+      message : "sign in not successful because " + error.message
+    })
+
+  }
+
+}) 
 
 
 
