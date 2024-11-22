@@ -3,7 +3,7 @@ const authRouter = express.Router();
 const bcrypt = require('bcrypt')
 const User = require('../models/user.model')
 
-const validateSignUpData = require('../utils/validation')
+const {validateSignUpData} = require('../utils/validation')
 
 const saltRounds = 10;
 
@@ -21,7 +21,7 @@ const saltRounds = 10;
 
 */ 
 
-authRouter.post('/signup', async (req, res) => {
+authRouter.post('/auth/signup', async (req, res) => {
    try { 
        validateSignUpData(req)
 
@@ -38,7 +38,7 @@ authRouter.post('/signup', async (req, res) => {
        res.status(200).json({
         message : "user signed up successfully"
        })
-
+ 
    } catch (error) {
       res.status(400).json({
         message : "Error " + error.message
@@ -47,7 +47,7 @@ authRouter.post('/signup', async (req, res) => {
      
 })
 
-authRouter.post('/signin', async (req, res) => {
+authRouter.post('/auth/signin', async (req, res) => {
   try {
     const {emailId , password} = req.body;
 
@@ -78,7 +78,7 @@ authRouter.post('/signin', async (req, res) => {
 })
 
 
-authRouter.get('/signout', async (req, res) => {
+authRouter.get('/auth/signout', async (req, res) => {
     res.cookie("token", null, {
       expires: new Date(Date.now()),
     });
@@ -86,4 +86,4 @@ authRouter.get('/signout', async (req, res) => {
   })
   
 
-module.exports = authRouter
+module.exports = authRouter;
