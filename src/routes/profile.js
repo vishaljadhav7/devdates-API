@@ -1,10 +1,10 @@
 const express = require('express');
-const profileRouter = express.Router();
+const userProfileRouter = express.Router();
 const verifyUser = require('../middlewares/auth');
 
 const { validateEditProfileData} = require('../utils/validation')
 
-profileRouter.get("/profile/view", verifyUser, async (req, res) => {
+userProfileRouter.get("/profile/view", verifyUser, async (req, res) => {
     try {
         const {userInfo} = req;
 
@@ -46,4 +46,4 @@ profileRouter.patch('/profile/edit', verifyUser, async (req, res) => {
      }
 })
 
-module.exports = profileRouter
+module.exports = userProfileRouter
