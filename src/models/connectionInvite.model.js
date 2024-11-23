@@ -31,7 +31,7 @@ connectionInviteSchema.pre("save", async function(next){
   next();
 })
 
-connectionInvite.index({
+connectionInviteSchema.index({
     fromUserId : 1,
     toUserId : 1
 })
