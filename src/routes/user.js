@@ -15,7 +15,7 @@ userRouter.get("/user/request/received", verifyUser, async (req, res) => {
             toUserId : loggedInUser._id,
             status : "interested",
         })
-        populate("fromUserId", SAFE_DATA);
+        .populate("fromUserId", SAFE_DATA);
 
         res.status(200).json({
             message : "all connection requests",
@@ -46,7 +46,7 @@ try{
     throw new Error("No connection requests found")
    }
      
-   const myConnectionRequests = allConnections.forEach((connection) => {
+   const myConnections = allConnections.map((connection) => {
     if(connection.fromUserId.toString() === loggedInUser._id.toString()){
         return connection.toUserId
     }
@@ -54,8 +54,8 @@ try{
    })
 
    res.status(200).json({
-    message : "your connection requests",
-    myConnectionRequests
+    message : "your connection",
+    myConnections
    })
     
   } catch (error) {

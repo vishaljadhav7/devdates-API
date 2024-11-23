@@ -11,7 +11,7 @@ requestRouter.post('/request/send/:status/:toUserId', verifyUser, async (req, re
         const {status, toUserId} = req.params;
         const fromUserId = req.userInfo._id;
 
-        if(!["interested" ,  "ignored"].includes(status)){
+        if(!["interested" , "ignored"].includes(status)){
             throw new Error("invalid status")
         }
       
