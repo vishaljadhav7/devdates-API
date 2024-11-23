@@ -5,7 +5,8 @@ const app = express()
 const PORT = Number(process.env.PORT || 3001)
 const cookieParser = require('cookie-parser')  
 const connectDB = require('./config/database')
-  
+const cors = require("cors");
+
 
 const authRouter = require('./routes/auth') 
 const userProfileRouter = require('./routes/profile')
