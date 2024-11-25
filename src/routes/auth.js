@@ -35,8 +35,16 @@ authRouter.post('/auth/signup', async (req, res) => {
 
        await newUser.save();
 
+       const token = await newUser.generateJWT();
+
+       res.cookie("token", token, {
+         expires: new Date(Date.now() + 8 * 3600000),
+       });
+   
+
        res.status(200).json({
-        message : "user signed up successfully"
+        message : "user signed up successfully",
+        userInfo : newUser
        })
  
    } catch (error) {
@@ -62,6 +70,7 @@ authRouter.post('/auth/signin', async (req, res) => {
     const token = await userInfo.generateJWT();
     
     res.cookie('token', token, {expires : new Date( Date.now() + 3600000)})
+ 
 
     res.status(200).json({
         message : "sign in successful",
