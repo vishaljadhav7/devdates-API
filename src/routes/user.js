@@ -42,16 +42,21 @@ try{
    .populate("fromUserId", SAFE_DATA)
    .populate("toUserId", SAFE_DATA)
 
-   if(!allConnections.length){
-    throw new Error("No connection requests found")
+   if(!allConnections.length){ 
+   return  res.status(200).json({
+        message : "No connection requests found",
+        myConnections : []
+       })
    }
      
    const myConnections = allConnections.map((connection) => {
-    if(connection.fromUserId.toString() === loggedInUser._id.toString()){
+    if(connection.fromUserId._id.toString() === loggedInUser._id?.toString()){
         return connection.toUserId
     }
     return connection.fromUserId
    })
+
+
 
    res.status(200).json({
     message : "your connection",
