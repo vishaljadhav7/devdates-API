@@ -1,26 +1,23 @@
 const express = require('express');
 const userProfileRouter = express.Router();
 const verifyUser = require('../middlewares/auth');
+const { validateEditProfileData} = require('../utils/validation');
+const ApiError = require('../utils/ApiError');
+const ApiResponse = require('../utils/ApiResponse');
 
-const { validateEditProfileData} = require('../utils/validation')
-
-userProfileRouter.get("/profile/view", verifyUser, async (req, res) => {
+userProfileRouter.get("/view", verifyUser, async (req, res) => {
     try {
         const {userInfo} = req;
 
-        res.status(200).json({ 
-            message : "user info",
-            userInfo
-        })
+        const serverResponse = new ApiResponse(200, userInfo , "user info")
+        res.status(200).json(serverResponse)
 
     } catch (error) {
-        res.status(404).json({
-            message : "Error " + error.message
-        })
+        res.status(404).json(new ApiError(400, "Error " + error.message))
     }
 })
 
-userProfileRouter.patch('/profile/edit', verifyUser, async (req, res) => {
+userProfileRouter.patch('/edit', verifyUser, async (req, res) => {
      try {
         if(!validateEditProfileData(req)){
           throw new Error('invalid edit request')
@@ -35,15 +32,13 @@ userProfileRouter.patch('/profile/edit', verifyUser, async (req, res) => {
 
         await loggedInUser.save(); 
 
-        res.json({
-            message: `${loggedInUser.firstName}, your profile updated successfuly`,
-            userInfo: loggedInUser,
-          });
+        const message = `${loggedInUser.firstName}, your profile updated successfuly`
+
+        const serverResponse = new ApiResponse(200, loggedInUser , message)
+        res.status(200).json(serverResponse)
         
      } catch (error) {
-        res.status(400).json({
-            message : "Error " + error.message
-        })
+        res.status(404).json(new ApiError(400, "Error " + error.message))
      }
 })
 

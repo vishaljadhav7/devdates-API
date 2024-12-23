@@ -4,10 +4,11 @@ const userRouter = express.Router();
 const verifyUser = require('../middlewares/auth');
 const ConnectionInvite = require('../models/connectionInvite.model');
 const User = require('../models/user.model');
-
+const ApiError = require('../utils/ApiError');
+const ApiResponse = require('../utils/ApiResponse');
 const SAFE_DATA = "firstName lastName photoURL age gender about skills";
 
-userRouter.get("/user/request/received", verifyUser, async (req, res) => {
+userRouter.get("/request/received", verifyUser, async (req, res) => {
     try {
         const loggedInUser = req.userInfo;
 
@@ -17,19 +18,18 @@ userRouter.get("/user/request/received", verifyUser, async (req, res) => {
         })
         .populate("fromUserId", SAFE_DATA);
 
-        res.status(200).json({
-            message : "all connection requests",
-            allConnectionRequests
-        })
+        // const message = req.userInfo._id + " is " + status + " in " + toUserId;
+
+        const serverResponse = new ApiResponse(200, allConnectionRequests, "all connection requests")
+        res.status(200).json(serverResponse)
+
     } catch (error) {
-        res.status(400).json({
-            message : "Error " + error.message
-        })
+        res.status(404).json(new ApiError(400, "Error " + error.message))
     }
 })
 
 
-userRouter.get("/user/connections", verifyUser, async (req, res) => {    
+userRouter.get("/connections", verifyUser, async (req, res) => {    
 try{
    const loggedInUser = req.userInfo;
 
@@ -43,10 +43,7 @@ try{
    .populate("toUserId", SAFE_DATA)
 
    if(!allConnections.length){ 
-   return  res.status(200).json({
-        message : "No connection requests found",
-        myConnections : []
-       })
+   return res.status(200).json(new ApiResponse(200, [],  "No connection requests found"))
    }
      
    const myConnections = allConnections.map((connection) => {
@@ -56,22 +53,16 @@ try{
     return connection.fromUserId
    })
 
-
-
-   res.status(200).json({
-    message : "your connection",
-    myConnections
-   })
+   const serverResponse = new ApiResponse(200, myConnections, "your connections fetched succesfully")
+   res.status(200).json(serverResponse)
     
   } catch (error) {
-    res.status(200).json({
-        message : "Error " + error.message
-    })
+    res.status(404).json(new ApiError(400, "Error " + error.message))
   }
 })
 
 
-userRouter.get("/user/core", verifyUser, async (req, res) => {
+userRouter.get("/core", verifyUser, async (req, res) => {
     try {
         /*
         feed , show all users except ->
@@ -111,9 +102,11 @@ userRouter.get("/user/core", verifyUser, async (req, res) => {
         //  .limit(limit);
    
 
-         res.json({ data: allUsers });
+        const serverResponse = new ApiResponse(200, allUsers , "your feed fetched succesfully")
+        res.status(200).json(serverResponse)
+         
     } catch (error) {
-        res.status(400).json({ message: err.message });
+        res.status(404).json(new ApiError(400, "Error " + error.message))
     }
 })
 

@@ -5,8 +5,12 @@ const verifyUser = require('../middlewares/auth')
 const User = require('../models/user.model')
 const ConnectionInvite = require('../models/connectionInvite.model'); 
 
+const ApiError = require('../utils/ApiError');
+const ApiResponse = require('../utils/ApiResponse');
 
-requestRouter.post('/request/send/:status/:toUserId', verifyUser, async (req, res) => {
+
+
+requestRouter.post('/send/:status/:toUserId', verifyUser, async (req, res) => {
     try {
         const {status, toUserId} = req.params;
         const fromUserId = req.userInfo._id;
@@ -40,21 +44,20 @@ requestRouter.post('/request/send/:status/:toUserId', verifyUser, async (req, re
         })
       
 
-        await newConnectionRequest.save()
+        await newConnectionRequest.save();
+        
+        const message = req.userInfo._id + " is " + status + " in " + toUserId;
 
-        res.status(200).json({
-            message : req.userInfo._id + " is " + status + " in " + toUserId,
-            connection : newConnectionRequest
-        })
+        const serverResponse = new ApiResponse(200, newConnectionRequest, message)
+        res.status(200).json(serverResponse)
+
     } catch (error) {
-        res.status(400).json({
-            message : "Error " + error.message
-        })
+        res.status(404).json(new ApiError(400, "Error " + error.message))
     }
 
 })
 
-requestRouter.post("/request/review/:status/:requestId", verifyUser, async (req, res) => {
+requestRouter.post("/review/:status/:requestId", verifyUser, async (req, res) => {
     try {
         const loggedInUser = req.userInfo;
         const {status, requestId} = req.params;
@@ -75,17 +78,14 @@ requestRouter.post("/request/review/:status/:requestId", verifyUser, async (req,
          
         existingConnectionRequest.status = status
 
-        await existingConnectionRequest.save()
+        await existingConnectionRequest.save();
 
-        res.status(200).json({
-            message : "connection status updated with " + existingConnectionRequest.status 
-        })
+        const message = "connection status updated with " + existingConnectionRequest.status 
+
+        res.status(200).json(new ApiResponse(200, null, message))
 
     } catch (error) {
-        res.status(400).json({
-            message : "Error " + error.message 
-        })
-
+        res.status(404).json(new ApiError(400, "Error " + error.message))
     }
 })
 
