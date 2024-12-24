@@ -2,22 +2,17 @@ const mongoose = require('mongoose');
 
 const MessageSchema = new mongoose.Schema(
   {
-    conversationId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Conversation',
-      required: true,
-    },
-    sender: {
+    senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    receiver: {
+    receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    content: {
+    message : {
       type: String,
       trim: true,
       required: true,
@@ -28,9 +23,13 @@ const MessageSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for optimizing message queries
-MessageSchema.index({ conversationId: 1 });
-MessageSchema.index({ sender: 1, receiver: 1 });
+MessageSchema.pre("save", async function(next){
+  const newMessage = this
+  if(newMessage.senderId.equals(newMessage.receiverId)){
+    throw new Error("can't send message to yourself")
+  }
+  next();
+});
 
 const Message = mongoose.model('Message', MessageSchema);
 

@@ -22,8 +22,6 @@ const ConversationSchema = new mongoose.Schema(
   }
 );
 
-// Ensures a unique conversation between two users
-ConversationSchema.index({ participants: 1 }, { unique: true });
 
 const Conversation = mongoose.model('Conversation', ConversationSchema);
 

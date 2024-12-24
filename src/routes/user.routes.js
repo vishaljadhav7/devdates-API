@@ -18,8 +18,6 @@ userRouter.get("/request/received", verifyUser, async (req, res) => {
         })
         .populate("fromUserId", SAFE_DATA);
 
-        // const message = req.userInfo._id + " is " + status + " in " + toUserId;
-
         const serverResponse = new ApiResponse(200, allConnectionRequests, "all connection requests")
         res.status(200).json(serverResponse)
 
