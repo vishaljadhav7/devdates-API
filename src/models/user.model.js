@@ -64,7 +64,10 @@ const userSchema = new mongoose.Schema({
               throw new Error('not a valid URL')
             }
           }
-    }
+    },
+    socketId : {
+      type : String
+    } 
 }, {timestamps : true});
 
 
@@ -81,4 +84,4 @@ userSchema.methods.validatePassword = async function (passwordInputByUser) {
   return isValidPassword;
 }
 
-module.exports = mongoose.model("user", userSchema)
+module.exports = mongoose.model("User", userSchema)

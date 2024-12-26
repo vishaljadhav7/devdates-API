@@ -2,6 +2,7 @@ const Conservation = require('../models/conversation.model');
 const Message = require('../models/message.model');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
+const {getReceiverSocketId, sendMessageToSocketId} = require('../socket');
 const User = require('../models/user.model');
 
 const sendMessage = async (req, res) => {
@@ -16,7 +17,6 @@ const sendMessage = async (req, res) => {
     if(!doesReceiverIdExist){
         throw new Error("user does not exist")
     }
-
 
     let conversation = await Conservation.findOne({
         participants : {$all : [senderId, receiverId]},
@@ -34,13 +34,26 @@ const sendMessage = async (req, res) => {
         message,
     });
     
+
     if(newMessage){
         conversation.messages.push(newMessage._id);
     };
     
    await Promise.all([conversation.save(), newMessage.save()]);
 
-   const serverResponse = new ApiResponse(200, newMessage, 'message sent succesfully');
+   const receiverSocketId = getReceiverSocketId(receiverId);
+
+   const generatedMessage = await Message.findById(newMessage._id).populate("senderId", "firstName lastName photoURL").populate("receiverId", "firstName lastName photoURL")
+   
+   if(receiverSocketId){
+       sendMessageToSocketId(receiverSocketId, {
+           eventName : "new-message",
+           data : generatedMessage
+        })
+   }
+
+
+   const serverResponse = new ApiResponse(200, generatedMessage, 'message sent succesfully');
 
    res.status(200).json(serverResponse);
   } catch (error) {
@@ -62,18 +75,20 @@ const getMessages = async (req, res) => {
 
       const conversation = await Conservation.findOne({
         participants : {$all : [senderId, receiverId]},
-       }).populate("messages");
+      }).populate("participants", "firstName lastName photoURL").populate("messages")
+      ;
 
     if (!conversation) {
         return res.status(200).json(
             new ApiResponse(200, [], 'conversation not found')
         )
     };
+  
 
-    const messages = conversation.messages;
+    const messages = conversation.messages; 
 
     return res.status(200).json(
-        new ApiResponse(200, messages, 'conversation found')
+        new ApiResponse(200, conversation, 'conversation found')
     ); 
 
     } catch (error) {
