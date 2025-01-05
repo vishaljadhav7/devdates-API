@@ -70,10 +70,10 @@ userRouter.get("/core", verifyUser, async (req, res) => {
         
          const loggedInUser = req.userInfo._id 
 
-        //  const page = parseInt(req.query.page) || 1;
-        //  let limit = parseInt(req.query.limit) || 10;
-        //  limit = limit > 50 ? 50 : limit;
-        //  const skip = (page - 1) * limit;
+         const page = parseInt(req.query.page) || 1;
+         let limit = parseInt(req.query.limit) || 5;
+         limit = limit > 50 ? 50 : limit;
+         const skip = (page - 1) * limit;
 
          const allConnections = await ConnectionInvite.find({
             $or : [
@@ -96,8 +96,8 @@ userRouter.get("/core", verifyUser, async (req, res) => {
             ] 
          })
          .select(SAFE_DATA)
-        //  .skip(skip)
-        //  .limit(limit);
+         .skip(skip)
+         .limit(limit);
    
 
         const serverResponse = new ApiResponse(200, allUsers , "your feed fetched succesfully")

@@ -10,7 +10,9 @@ userProfileRouter.get("/view", verifyUser, async (req, res) => {
     try {
         const {userInfo} = req;
 
-        const serverResponse = new ApiResponse(200, userInfo , "user info")
+        const userForView = await User.findById(userInfo._id).select("-password");
+
+        const serverResponse = new ApiResponse(200, userForView , "user for view")
         res.status(200).json(serverResponse)
 
     } catch (error) {
@@ -33,9 +35,11 @@ userProfileRouter.patch('/edit', verifyUser, async (req, res) => {
 
         await loggedInUser.save(); 
 
-        const message = `${loggedInUser.firstName}, your profile updated successfuly`
+        const editedProfile = await User.findById(loggedInUser._id).select("-password");
 
-        const serverResponse = new ApiResponse(200, loggedInUser , message)
+        const message = `${editedProfile.firstName}, your profile updated successfuly`
+
+        const serverResponse = new ApiResponse(200, editedProfile , message)
         res.status(200).json(serverResponse)
         
      } catch (error) {
