@@ -3,8 +3,12 @@ const User = require('../models/user.model');
 
 const verifyUser = async (req, res, next) => {
   try {
-    // Extract token from cookies or Authorization header
-    let token = req.cookies?.token;
+    let token = null;
+
+    if (req.cookies?.token) {
+      token = req.cookies.token;
+    }
+
 
     if (!token && req.headers.authorization) {
       const authHeader = req.headers.authorization;
@@ -13,31 +17,45 @@ const verifyUser = async (req, res, next) => {
       }
     }
 
-    // If no token is provided from either source
+
     if (!token) {
-      throw new Error('Token not provided in cookies or headers');
+      return res.status(401).json({
+        success: false,
+        message: 'Token not provided in cookies or headers',
+      });
     }
 
-    // Verify token
-    const decodedMessage = jwt.verify(token, process.env.SECRET_KEY);
+ 
+    let decodedMessage;
+    try {
+      decodedMessage = jwt.verify(token, process.env.SECRET_KEY);
+    } catch (err) {
+      console.error('JWT Verification Error:', err.message);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or malformed token',
+      });
+    }
+
     const { _id } = decodedMessage;
 
-    // Fetch user from the database
+
     const userInfo = await User.findById(_id);
     if (!userInfo) {
-      throw new Error('User not found');
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
     }
 
-    // Attach user info to the request object
     req.userInfo = userInfo;
-
     next();
 
   } catch (error) {
-    console.error('Token Verification Error:', error.message);
-    res.status(401).json({
+    console.error('Token Verification Middleware Error:', error.message);
+    res.status(500).json({
       success: false,
-      message: 'Unauthorized: ' + error.message,
+      message: 'Internal Server Error: ' + error.message,
     });
   }
 };
