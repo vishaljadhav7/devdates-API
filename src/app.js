@@ -6,7 +6,7 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: ['http://localhost:5173'], // Explicitly allow your frontend origin
+    origin: ['https://dev-date-ui.vercel.app', "http://localhost:5173"], // Explicitly allow your frontend origin
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   })

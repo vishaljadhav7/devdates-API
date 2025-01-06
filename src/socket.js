@@ -7,7 +7,7 @@ let connectedUsers = {};
 function createSocketConnection(server) {
       io = socketIo(server, {
         cors : {
-            origin : "*",
+            origin : ["https://dev-date-ui.vercel.app", "http://localhost:5173"],
             methods : ['GET', 'POST']
         }
       });
